@@ -1,4 +1,10 @@
 import random
+user_input = input("Please enter your name: ")
+while not user_input.isalpha():
+    print("Invalid input. Please enter a name without numbers or special characters.")
+    user_input = input("Please enter your name: ")
+if user_input.isalpha():
+    print(f"Hello, {user_input}!")
 
 def quiz():
     questions = [
