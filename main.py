@@ -1,7 +1,10 @@
 import random
 user_input = input("Please enter your name: ")
-while not user_input.isalpha():
-    print("Invalid input. Please enter a name without numbers or special characters.")
+while not user_input.isalpha() or len(user_input) < 2:
+    if not user_input.isalpha():
+        print("Invalid input. Please enter a name without numbers or special characters.")
+    elif len(user_input) < 2:
+        print("Invalid input. Please enter a name with at least 2 letters.")
     user_input = input("Please enter your name: ")
 if user_input.isalpha():
     print(f"Hello, {user_input}!")
