@@ -5,6 +5,10 @@ while not user_input.isalpha():
     user_input = input("Please enter your name: ")
 if user_input.isalpha():
     print(f"Hello, {user_input}!")
+    import time
+    print("Get ready! The quiz will start in 3 seconds...")
+    time.sleep(3)
+    print("Starting quiz now!\n")
 
 def quiz():
     questions = [
