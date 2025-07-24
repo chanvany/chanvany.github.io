@@ -110,7 +110,7 @@
       font-weight: bold;
       margin-bottom: 15px;
       color: #000;
-      display: flex;
+      display: flex; 
       justify-content: center;
       align-items: center;
     }
@@ -230,7 +230,7 @@
 
     startBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();
-      const validNameRegex = /^[a-zA-Z\s]+$/; // only letters and spaces
+      const validNameRegex = /^[a-zA-Z\s]+$/; 
 
       if (!name) {
         alert("Please enter your name to start!");
@@ -245,7 +245,7 @@
       userName = name;
       nameContainer.style.display = "none";
 
-      // Show countdown
+      
       let countdown = 3;
       countdownEl.style.display = "block";
       greetingEl.style.display = "block";
@@ -283,7 +283,6 @@
         optionsEl.appendChild(btn);
       });
     }
-
     function selectAnswer(btn, answer) {
       const options = document.querySelectorAll(".option");
       options.forEach((opt) => (opt.style.background = "#eee"));
@@ -316,7 +315,7 @@
     });
 
     tryAgainBtn.addEventListener("click", () => {
-      // Reset the quiz and show the name input again
+     
       currentQuestion = 0;
       score = 0;
       selected = null;
@@ -326,10 +325,10 @@
       optionsEl.style.display = "block";
       submitBtn.style.display = "block";
 
-      // Show the name input field again
+     
       nameContainer.style.display = "block";
       quiz.style.display = "none";
-      nameInput.value = ""; // Clear the previous username input
+      nameInput.value = ""; 
     });
   </script>
 </body>
