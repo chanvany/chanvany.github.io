@@ -105,11 +105,22 @@
       background: #d32f2f;
     }
 
-    #countdown {
+    #countdown-container {
       font-size: 22px;
       font-weight: bold;
       margin-bottom: 15px;
       color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #countdown {
+      margin-right: 10px;
+    }
+
+    #greeting {
+      font-weight: bold;
     }
   </style>
 </head>
@@ -122,7 +133,10 @@
       <button id="start-btn">Start Quiz</button>
     </div>
 
-    <div id="countdown" style="display:none;"></div>
+    <div id="countdown-container" style="display:none;">
+      <div id="countdown"></div>
+      <div id="greeting"></div>
+    </div>
 
     <div id="quiz" style="display: none;">
       <div id="question" class="question">Question text</div>
@@ -173,7 +187,7 @@
       {
         question: "What does CSS stand for?",
         options: [
-           "Colorful Style Sheets",
+          "Colorful Style Sheets",
           "Creative Style Sheets",
           "Cascading Style Sheets",
           "Computer Style Sheets",
@@ -207,6 +221,7 @@
     const resultEl = document.getElementById("result");
     const tryAgainBtn = document.getElementById("try-again");
     const countdownEl = document.getElementById("countdown");
+    const greetingEl = document.getElementById("greeting");
 
     let currentQuestion = 0;
     let score = 0;
@@ -233,7 +248,9 @@
       // Show countdown
       let countdown = 3;
       countdownEl.style.display = "block";
+      greetingEl.style.display = "block";
       countdownEl.textContent = `Quiz starting in ${countdown}...`;
+      greetingEl.textContent = `Hello, ${userName}!`;
 
       const intervalId = setInterval(() => {
         countdown--;
@@ -242,6 +259,7 @@
         } else {
           clearInterval(intervalId);
           countdownEl.style.display = "none";
+          greetingEl.style.display = "none";
           startQuiz();
         }
       }, 1000);
@@ -292,7 +310,7 @@
         questionEl.style.display = "none";
         optionsEl.style.display = "none";
         submitBtn.style.display = "none";
-                resultEl.textContent = `You got ${score} out of ${quizData.length} correct, ${userName}!`;
+        resultEl.textContent = `You got ${score} out of ${quizData.length} correct, ${userName}!`;
         tryAgainBtn.style.display = "inline-block";
       }
     });
