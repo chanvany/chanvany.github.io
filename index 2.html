@@ -214,6 +214,7 @@
     let selected = null;
     let intervalId;
 
+    // Start quiz when user clicks "Start Quiz"
     startBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();
       const validNameRegex = /^[a-zA-Z\s]+$/; // only letters and spaces
@@ -249,11 +250,13 @@
       }, 1000);
     });
 
+    // Start the quiz after countdown
     function startQuiz() {
       quiz.style.display = "block";
       loadQuestion();
     }
 
+    // Load the question and options
     function loadQuestion() {
       const q = quizData[currentQuestion];
       questionEl.textContent = q.question;
@@ -268,6 +271,7 @@
       });
     }
 
+    // Select an answer
     function selectAnswer(btn, answer) {
       const options = document.querySelectorAll(".option");
       options.forEach((opt) => (opt.style.background = "#eee"));
@@ -275,6 +279,7 @@
       selected = answer;
     }
 
+    // Submit the answer and move to the next question
     submitBtn.addEventListener("click", () => {
       if (selected === null) {
         alert("Please select an answer!");
@@ -299,6 +304,7 @@
       }
     });
 
+    // Try again button logic (user has to re-enter name)
     tryAgainBtn.addEventListener("click", () => {
       currentQuestion = 0;
       score = 0;
@@ -308,7 +314,11 @@
       questionEl.style.display = "block";
       optionsEl.style.display = "block";
       submitBtn.style.display = "inline-block";
-      loadQuestion();
+
+      // Show name container again and reset quiz container
+      nameContainer.style.display = "block";
+      quiz.style.display = "none";
+      nameInput.value = "";  // Clear the previous name
     });
   </script>
 </body>
