@@ -105,22 +105,11 @@
       background: #d32f2f;
     }
 
-    #countdown-container {
+    #countdown {
       font-size: 22px;
       font-weight: bold;
       margin-bottom: 15px;
       color: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #countdown {
-      margin-right: 10px;
-    }
-
-    #greeting {
-      font-weight: bold;
     }
   </style>
 </head>
@@ -130,20 +119,17 @@
       <label for="username">Please enter your name:</label><br />
       <input type="text" id="username" placeholder="Enter your name" />
       <br />
-      <button id="start-btn">Start Quiz</button>
+      <button id="start-btn" type="button">Start Quiz</button>
     </div>
 
-    <div id="countdown-container" style="display:none;">
-      <div id="countdown"></div>
-      <div id="greeting"></div>
-    </div>
+    <div id="countdown" style="display:none;"></div>
 
     <div id="quiz" style="display: none;">
       <div id="question" class="question">Question text</div>
       <div id="options"></div>
-      <button id="submit">Next</button>
+      <button id="submit" type="button">Next</button>
       <div id="result"></div>
-      <button id="try-again" style="display: none;">Try Again</button>
+      <button id="try-again" style="display: none;" type="button">Try Again</button>
     </div>
   </div>
 
@@ -221,43 +207,43 @@
     const resultEl = document.getElementById("result");
     const tryAgainBtn = document.getElementById("try-again");
     const countdownEl = document.getElementById("countdown");
-    const greetingEl = document.getElementById("greeting");
 
     let currentQuestion = 0;
     let score = 0;
     let userName = "";
     let selected = null;
+    let intervalId;
 
     startBtn.addEventListener("click", () => {
       const name = nameInput.value.trim();
-      const validNameRegex = /^[a-zA-Z\s]+$/;
+      const validNameRegex = /^[a-zA-Z\s]+$/; // only letters and spaces
 
       if (!name) {
         alert("Please enter your name to start!");
         return;
       }
       if (!validNameRegex.test(name)) {
-        alert("Name can only contain letters and spaces.");
+        alert(
+          "Name can only contain letters and spaces. No numbers or special characters allowed."
+        );
         return;
       }
       userName = name;
       nameContainer.style.display = "none";
 
-   
+      // Show countdown with a hello message
       let countdown = 3;
       countdownEl.style.display = "block";
-      greetingEl.style.display = "block";
-      countdownEl.textContent = `Quiz starting in ${countdown}...`;
-      greetingEl.textContent = `Hello, ${userName}!`;
+      countdownEl.textContent = `Hello, ${userName}! Quiz starting in ${countdown}...`;
 
-      const intervalId = setInterval(() => {
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
         countdown--;
         if (countdown > 0) {
-          countdownEl.textContent = `Quiz starting in ${countdown}...`;
+          countdownEl.textContent = `Hello, ${userName}! Quiz starting in ${countdown}...`;
         } else {
           clearInterval(intervalId);
           countdownEl.style.display = "none";
-          greetingEl.style.display = "none";
           startQuiz();
         }
       }, 1000);
@@ -321,11 +307,8 @@
       tryAgainBtn.style.display = "none";
       questionEl.style.display = "block";
       optionsEl.style.display = "block";
-      submitBtn.style.display = "block";
-
-      nameContainer.style.display = "block";
-      quiz.style.display = "none";
-      nameInput.value = "";
+      submitBtn.style.display = "inline-block";
+      loadQuestion();
     });
   </script>
 </body>
