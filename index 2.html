@@ -105,13 +105,6 @@
       background: #d32f2f;
     }
 
-    #greeting {
-      font-weight: bold;
-      margin-bottom: 20px;
-      font-size: 20px;
-      color: #000;
-    }
-
     #countdown {
       font-size: 22px;
       font-weight: bold;
@@ -132,7 +125,6 @@
     <div id="countdown" style="display:none;"></div>
 
     <div id="quiz" style="display: none;">
-      <div id="greeting"></div>
       <div id="question" class="question">Question text</div>
       <div id="options"></div>
       <button id="submit">Next</button>
@@ -181,7 +173,7 @@
       {
         question: "What does CSS stand for?",
         options: [
-          "Colorful Style Sheets",
+           "Colorful Style Sheets",
           "Creative Style Sheets",
           "Cascading Style Sheets",
           "Computer Style Sheets",
@@ -209,7 +201,6 @@
     const startBtn = document.getElementById("start-btn");
     const nameInput = document.getElementById("username");
     const quiz = document.getElementById("quiz");
-    const greeting = document.getElementById("greeting");
     const questionEl = document.getElementById("question");
     const optionsEl = document.getElementById("options");
     const submitBtn = document.getElementById("submit");
@@ -242,12 +233,12 @@
       // Show countdown
       let countdown = 3;
       countdownEl.style.display = "block";
-      countdownEl.textContent = `Hello, ${userName}! Quiz starting in ${countdown}...`;
+      countdownEl.textContent = `Quiz starting in ${countdown}...`;
 
       const intervalId = setInterval(() => {
         countdown--;
         if (countdown > 0) {
-          countdownEl.textContent = `Hello, ${userName}! Quiz starting in ${countdown}...`;
+          countdownEl.textContent = `Quiz starting in ${countdown}...`;
         } else {
           clearInterval(intervalId);
           countdownEl.style.display = "none";
@@ -258,7 +249,6 @@
 
     function startQuiz() {
       quiz.style.display = "block";
-      greeting.textContent = `Hello, ${userName}! Good luck!`;
       loadQuestion();
     }
 
@@ -302,12 +292,13 @@
         questionEl.style.display = "none";
         optionsEl.style.display = "none";
         submitBtn.style.display = "none";
-        resultEl.textContent = `You got ${score} out of ${quizData.length} correct, ${userName}!`;
+                resultEl.textContent = `You got ${score} out of ${quizData.length} correct, ${userName}!`;
         tryAgainBtn.style.display = "inline-block";
       }
     });
 
     tryAgainBtn.addEventListener("click", () => {
+      // Reset the quiz and show the name input again
       currentQuestion = 0;
       score = 0;
       selected = null;
@@ -316,9 +307,13 @@
       questionEl.style.display = "block";
       optionsEl.style.display = "block";
       submitBtn.style.display = "block";
-      greeting.textContent = `Hello, ${userName}! Good luck!`;
-      loadQuestion();
+
+      // Show the name input field again
+      nameContainer.style.display = "block";
+      quiz.style.display = "none";
+      nameInput.value = ""; // Clear the previous username input
     });
   </script>
 </body>
 </html>
+
