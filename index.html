@@ -126,12 +126,12 @@
         {
             question: "What is the name of the first popular graphical web browser?",
             options: ["Chrome", "Safari", "Opera", "Mosaic"],
-            anwser: "Mosaic"
+            answer: "Mosaic"
         },
         {
             question: "Who is credited with inventing the first mechanical computer?",
             options: ["Charles Babbage", "Alan Turing", "Sir Tim Berners-Lee", "John von Neumann"],
-            anwser: "Charles Babbage"
+            answer: "Charles Babbage"  <!-- Fixed typo from "answser" to "answer" -->
         }
     ];
 
@@ -161,8 +161,8 @@
 
     function selectAnswer(btn, answer) {
         const options = document.querySelectorAll('.option');
-        options.forEach(opt => opt.style.background = '#eee');
-        btn.style.background = '#c3e6cb';
+        options.forEach(opt => opt.style.background = '#eee');  // Reset all options
+        btn.style.background = '#c3e6cb';  // Highlight the selected option
         selected = answer;
     }
 
@@ -172,21 +172,41 @@
             return;
         }
 
-        if (selected === quizData[currentQuestion].answer) {
+        // Highlight the correct answer
+        const correctAnswer = quizData[currentQuestion].answer;
+        const options = document.querySelectorAll('.option');
+
+        if (selected === correctAnswer) {
             score++;
+            options.forEach(option => {
+                if (option.textContent === correctAnswer) {
+                    option.style.background = '#4CAF50';  // Correct answer - green
+                }
+            });
+        } else {
+            options.forEach(option => {
+                if (option.textContent === correctAnswer) {
+                    option.style.background = '#4CAF50';  // Correct answer - green
+                } else if (option.textContent === selected) {
+                    option.style.background = '#F44336';  // Incorrect answer - red
+                }
+            });
         }
 
         selected = null;
         currentQuestion++;
 
+        // After the last question, show the result
         if (currentQuestion < quizData.length) {
-            loadQuestion();
+            setTimeout(loadQuestion, 1000);
         } else {
-            questionEl.style.display = 'none';
-            optionsEl.style.display = 'none';
-            submitBtn.style.display = 'none';
-            resultEl.textContent = `You got ${score} out of ${quizData.length} correct!`;
-            tryAgainBtn.style.display = 'inline-block';
+            setTimeout(() => {
+                questionEl.style.display = 'none';
+                optionsEl.style.display = 'none';
+                submitBtn.style.display = 'none';
+                resultEl.textContent = `You got ${score} out of ${quizData.length} correct!`;
+                tryAgainBtn.style.display = 'inline-block';
+            }, 1000);
         }
     });
 
