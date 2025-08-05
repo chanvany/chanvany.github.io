@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Quiz App v2</title>
+  <style>
+    body {
+      font-family: Helvetica, sans-serif;
+      background: #b1e31e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .quiz-container {
+      background: #ffeb3b;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      width: 400px;
+      text-align: center;
+    }
+
+    #name-container {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      width: 80%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #388e3c;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #2c6e22;
+    }
+
+    .question {
+      font-size: 25px;
+      margin-bottom: 15px;
+      color: #000000;
+    }
+
+    .option {
+      display: block;
+      background: #f8f8f8;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .option:hover {
+      background: #ff9800;
+    }
+
+    #submit {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #388e3c;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #submit:hover {
+      background: #2c6e22;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #e74c3c;
+    }
+
+    #try-again {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background: #f44336;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #try-again:hover {
+      background: #d32f2f;
+    }
+
+    #countdown {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div id="name-container">
+      <label for="username">Please enter your name:</label><br />
+      <input type="text" id="username" placeholder="Enter your name" />
+      <br />
+      <button id="start-btn" type="button">Start Quiz</button>
+    </div>
+
+    <div id="countdown" style="display:none;"></div>
+
+    <div id="quiz" style="display: none;">
+      <div id="question" class="question">Question text</div>
+      <div id="options"></div>
+      <button id="submit" type="button">Next</button>
+      <div id="result"></div>
+      <button id="try-again" style="display: none;" type="button">Try Again</button>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "One kilobyte is equal to how many bytes?",
+        options: ["10", "100", "1000", "10000"],
+        answer: "1000",
+      },
+      {
+        question: "Which language runs in a web browser?",
+        options: ["Python", "Java", "CSS", "JavaScript"],
+        answer: "JavaScript",
+      },
+      {
+        question: "Who is the founder of Microsoft?",
+        options: ["Steve Jobs", "Bill Gates", "Elon Musk", "Mark Zuckerberg"],
+        answer: "Bill Gates",
+      },
+      {
+        question: "What does HTML stand for?",
+        options: [
+          "Hyper Text Preprocessor",
+          "Hyper Text Markup Language",
+          "Hyper Tool Multi Language",
+          "Hyper Transfer Markup Language",
+        ],
+        answer: "Hyper Text Markup Language",
+      },
+      {
+        question: "What year was JavaScript created?",
+        options: ["1995", "2000", "1990", "1985"],
+        answer: "1995",
+      },
+      {
+        question: "Which of the following is a CSS framework?",
+        options: ["Bootstrap", "Python", "Node.js", "HTML"],
+        answer: "Bootstrap",
+      },
+      {
+        question: "What does CSS stand for?",
+        options: [
+          "Colorful Style Sheets",
+          "Creative Style Sheets",
+          "Cascading Style Sheets",
+          "Computer Style Sheets",
+        ],
+        answer: "Cascading Style Sheets",
+      },
+      {
+        question: "What is the name of the first popular graphical web browser?",
+        options: ["Chrome", "Safari", "Opera", "Mosaic"],
+        answer: "Mosaic",
+      },
+      {
+        question: "Who is credited with inventing the first mechanical computer?",
+        options: [
+          "Charles Babbage",
+          "Alan Turing",
+          "Sir Tim Berners-Lee",
+          "John von Neumann",
+        ],
+        answer: "Charles Babbage",
+      },
+    ];
+
+    const nameContainer = document.getElementById("name-container");
+    const startBtn = document.getElementById("start-btn");
+    const nameInput = document.getElementById("username");
+    const quiz = document.getElementById("quiz");
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const submitBtn = document.getElementById("submit");
+    const resultEl = document.getElementById("result");
+    const tryAgainBtn = document.getElementById("try-again");
+    const countdownEl = document.getElementById("countdown");
+
+    let currentQuestion = 0;
+    let score = 0;
+    let userName = "";
+    let selected = null;
+    let intervalId;
+
+    // Start quiz when user clicks "Start Quiz"
+    startBtn.addEventListener("click", () => {
+      const name = nameInput.value.trim();
+      const validNameRegex = /^[a-zA-Z\s]+$/; // only letters and spaces
+
+      if (!name) {
+        alert("Please enter your name to start!");
+        return;
+      }
+      if (!validNameRegex.test(name)) {
+        alert(
+          "Name can only contain letters and spaces. No numbers or special characters allowed."
+        );
+        return;
+      }
+      userName = name;
+      nameContainer.style.display = "none";
+
+      // Show countdown with a hello message
+      let countdown = 3;
+      countdownEl.style.display = "block";
+      countdownEl.textContent = `Hello, ${userName}! Quiz starting in ${countdown}...`;
+
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownEl.textContent = `Hello, ${userName}! Quiz starting in ${countdown}...`;
+        } else {
+          clearInterval(intervalId);
+          countdownEl.style.display = "none";
+          startQuiz();
+        }
+      }, 1000);
+    });
+
+    // Start the quiz after countdown
+    function startQuiz() {
+      quiz.style.display = "block";
+      loadQuestion();
+    }
+
+    // Load the question and options
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      questionEl.textContent = q.question;
+      optionsEl.innerHTML = "";
+
+      q.options.forEach((option) => {
+        const btn = document.createElement("div");
+        btn.classList.add("option");
+        btn.textContent = option;
+        btn.onclick = () => selectAnswer(btn, option);
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    // Select an answer
+    function selectAnswer(btn, answer) {
+      const options = document.querySelectorAll(".option");
+      options.forEach((opt) => (opt.style.background = "#eee"));
+      btn.style.background = "#c3e6cb";
+      selected = answer;
+    }
+
+    // Submit the answer and move to the next question
+    submitBtn.addEventListener("click", () => {
+      if (selected === null) {
+        alert("Please select an answer!");
+        return;
+      }
+
+      if (selected === quizData[currentQuestion].answer) {
+        score++;
+      }
+
+      selected = null;
+      currentQuestion++;
+
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        questionEl.style.display = "none";
+        optionsEl.style.display = "none";
+        submitBtn.style.display = "none";
+        resultEl.textContent = `You got ${score} out of ${quizData.length} correct, ${userName}!`;
+        tryAgainBtn.style.display = "inline-block";
+      }
+    });
+
+    // Try again button logic (user has to re-enter name)
+    tryAgainBtn.addEventListener("click", () => {
+      currentQuestion = 0;
+      score = 0;
+      selected = null;
+      resultEl.textContent = "";
+      tryAgainBtn.style.display = "none";
+      questionEl.style.display = "block";
+      optionsEl.style.display = "block";
+      submitBtn.style.display = "inline-block";
+
+      // Show name container again and reset quiz container
+      nameContainer.style.display = "block";
+      quiz.style.display = "none";
+      nameInput.value = "";  // Clear the previous name
+    });
+  </script>
+</body>
+</html>

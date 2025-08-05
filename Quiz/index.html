@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Quiz App v1</title>
+    <style>
+        body {
+            font-family: Helvetica, sans-serif;
+            background: #b1e31e; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .quiz-container {
+            background: #ffeb3b; 
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            width: 400px;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 25px;
+            margin-bottom: 15px;
+            color: #000000; 
+        }
+
+        .option {
+            display: block;
+            background: #f8f8f8; 
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: #ff9800; 
+        }
+
+        #submit {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border: none;
+            background: #388e3c; 
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #submit:hover {
+            background: #2c6e22; 
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #e74c3c; 
+        }
+
+        #try-again {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            background: #f44336; 
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #try-again:hover {
+            background: #d32f2f; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="question" class="question">Question text</div>
+    <div id="options"></div>
+    <button id="submit">Next</button>
+    <div id="result"></div>
+    <button id="try-again" style="display: none;">Try Again</button>
+</div>
+
+<script>
+    const quizData = [
+        {
+            question: "One kilobyte is equal to how many bytes?",
+            options: ["10", "100", "1000", "10000"],
+            answer: "1000"
+        },
+        {
+            question: "Which language runs in a web browser?",
+            options: ["Python", "Java", "CSS", "JavaScript"],
+            answer: "JavaScript"
+        },
+        {
+            question: "Who is the founder of Microsoft?",
+            options: ["Steve Jobs", "Bill Gates", "Elon Musk", "Mark Zuckerberg"],
+            answer: "Bill Gates"
+        },
+        {
+            question: "What does HTML stand for?",
+            options: ["Hyper Text Preprocessor", "Hyper Text Markup Language", "Hyper Tool Multi Language", "Hyper Transfer Markup Language"],
+            answer: "Hyper Text Markup Language"
+        },
+        {
+            question: "What year was JavaScript created?",
+            options: ["1995", "2000", "1990", "1985"],
+            answer: "1995"
+        },
+        {
+            question: "Which of the following is a CSS framework?",
+            options: ["Bootstrap", "Python", "Node.js", "HTML"],
+            answer: "Bootstrap"
+        },
+        {
+            question: "What does CSS stand for?",
+            options: ["Colorful Style Sheets", "Creative Style Sheets", "Cascading Style Sheets", "Computer Style Sheets"],
+            answer: "Cascading Style Sheets"
+        },
+        {
+            question: "What is the name of the first popular graphical web browser?",
+            options: ["Chrome", "Safari", "Opera", "Mosaic"],
+            answer: "Mosaic"
+        },
+        {
+            question: "Who is credited with inventing the first mechanical computer?",
+            options: ["Charles Babbage", "Alan Turing", "Sir Tim Berners-Lee", "John von Neumann"],
+            answer: "Charles Babbage"  <!-- Fixed typo from "answser" to "answer" -->
+        }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const submitBtn = document.getElementById('submit');
+    const resultEl = document.getElementById('result');
+    const tryAgainBtn = document.getElementById('try-again');
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionEl.textContent = q.question;
+        optionsEl.innerHTML = "";
+
+        q.options.forEach(option => {
+            const btn = document.createElement('div');
+            btn.classList.add('option');
+            btn.textContent = option;
+            btn.onclick = () => selectAnswer(btn, option);
+            optionsEl.appendChild(btn);
+        });
+    }
+
+    let selected = null;
+
+    function selectAnswer(btn, answer) {
+        const options = document.querySelectorAll('.option');
+        options.forEach(opt => opt.style.background = '#eee');  // Reset all options
+        btn.style.background = '#c3e6cb';  // Highlight the selected option
+        selected = answer;
+    }
+
+    submitBtn.addEventListener('click', () => {
+        if (selected === null) {
+            alert("Please select an answer!");
+            return;
+        }
+
+        // Highlight the correct answer
+        const correctAnswer = quizData[currentQuestion].answer;
+        const options = document.querySelectorAll('.option');
+
+        if (selected === correctAnswer) {
+            score++;
+            options.forEach(option => {
+                if (option.textContent === correctAnswer) {
+                    option.style.background = '#4CAF50';  // Correct answer - green
+                }
+            });
+        } else {
+            options.forEach(option => {
+                if (option.textContent === correctAnswer) {
+                    option.style.background = '#4CAF50';  // Correct answer - green
+                } else if (option.textContent === selected) {
+                    option.style.background = '#F44336';  // Incorrect answer - red
+                }
+            });
+        }
+
+        selected = null;
+        currentQuestion++;
+
+        // After the last question, show the result
+        if (currentQuestion < quizData.length) {
+            setTimeout(loadQuestion, 1000);
+        } else {
+            setTimeout(() => {
+                questionEl.style.display = 'none';
+                optionsEl.style.display = 'none';
+                submitBtn.style.display = 'none';
+                resultEl.textContent = `You got ${score} out of ${quizData.length} correct!`;
+                tryAgainBtn.style.display = 'inline-block';
+            }, 1000);
+        }
+    });
+
+    tryAgainBtn.addEventListener('click', () => {
+        currentQuestion = 0;
+        score = 0;
+        resultEl.textContent = '';
+        tryAgainBtn.style.display = 'none';
+        questionEl.style.display = 'block';
+        optionsEl.style.display = 'block';
+        submitBtn.style.display = 'block';
+        loadQuestion();
+    });
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
