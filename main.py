@@ -1,6 +1,15 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
+import requests
+from io import BytesIO
+try:
+    from replit.object_storage import Client
+    OBJECT_STORAGE_AVAILABLE = True
+except ImportError:
+    OBJECT_STORAGE_AVAILABLE = False
+
 
 # Define the filename for storing stock data
 STOCK_FILE = "stock.txt"
@@ -12,6 +21,7 @@ class StockApp(tk.Tk):
         self.geometry("600x480")  # Set the window size
         self.initialize_stock_file()  # Initialize stock file if it doesn't exist
         self.stock = self.load_stock()  # Load the stock data into the stock dictionary - data structure used to store information about the items in stock.
+        self.load_images()  # Load images for each stock item
         self.create_widgets()  # Create the user interface widgets( UI (User Interface) of this stock management application is created using Tkinter and the widgets in Tkinter are elements of the GUI (like buttons, labels, and text boxes))
         self.refresh_list()  # Refresh the list of stock items in the GUI(Responsible for whenever there is a change in the stock data.)
 
@@ -47,6 +57,94 @@ class StockApp(tk.Tk):
             messagebox.showerror("Error", f"Failed to load stock:\n{e}")
         return s  # Return the stock dictionary(core data structure of the application.)
 
+    def load_images(self):
+        """
+        Load images for each stock item from Object Storage, local files, or create placeholders.
+        """
+        self.images = {}
+        size = (64, 64)
+        
+        # Image names for each item
+        image_names = {
+            1: "screw.png",
+            2: "hammer.png", 
+            3: "saw.png",
+            4: "steel.png",
+            5: "timber.png"
+        }
+        
+        # Initialize Object Storage client if available
+        storage_client = None
+        if OBJECT_STORAGE_AVAILABLE:
+            try:
+                storage_client = Client()
+                print("Object Storage client initialized")
+            except Exception as e:
+                print(f"Failed to initialize Object Storage: {e}")
+        
+        # Create default placeholder image
+        placeholder = Image.new("RGBA", size, (200, 200, 200, 255))
+        default_photo = ImageTk.PhotoImage(placeholder)
+        
+        # Load images with priority: Object Storage -> Local File -> Placeholder
+        for item_id in self.stock.keys():
+            if item_id in image_names:
+                image_name = image_names[item_id]
+                try:
+                    # Try Object Storage first
+                    if storage_client:
+                        try:
+                            image_data = storage_client.download_as_bytes(image_name)
+                            image = Image.open(BytesIO(image_data))
+                            image = image.resize(size, Image.Resampling.LANCZOS)
+                            photo = ImageTk.PhotoImage(image)
+                            self.images[item_id] = photo
+                            print(f"Loaded Object Storage image for item {item_id}")
+                            continue
+                        except Exception:
+                            pass  # Fall back to local file
+                    
+                    # Try local file
+                    if os.path.exists(image_name):
+                        photo = self.load_image_from_file(image_name, size)
+                        self.images[item_id] = photo
+                        print(f"Loaded local image for item {item_id}")
+                        
+                        # Upload to Object Storage for future use
+                        if storage_client:
+                            try:
+                                with open(image_name, 'rb') as f:
+                                    storage_client.upload_from_bytes(image_name, f.read())
+                                print(f"Uploaded {image_name} to Object Storage")
+                            except Exception as e:
+                                print(f"Failed to upload {image_name} to Object Storage: {e}")
+                    else:
+                        self.images[item_id] = default_photo
+                        
+                except Exception as e:
+                    print(f"Failed to load image for item {item_id}: {e}")
+                    self.images[item_id] = default_photo
+            else:
+                self.images[item_id] = default_photo
+
+    def load_image_from_url(self, url, size):
+        """
+        Load an image from a URL and resize it.
+        """
+        response = requests.get(url)
+        response.raise_for_status()
+        image = Image.open(BytesIO(response.content))
+        image = image.resize(size, Image.Resampling.LANCZOS)
+        return ImageTk.PhotoImage(image)
+
+    def load_image_from_file(self, file_path, size):
+        """
+        Load an image from a local file and resize it.
+        """
+        image = Image.open(file_path)
+        image = image.resize(size, Image.Resampling.LANCZOS)
+        return ImageTk.PhotoImage(image)
+
     def save_stock(self):
         """
         Save the current stock data back to the file.
@@ -72,15 +170,39 @@ class StockApp(tk.Tk):
 
         # STOCK tab UI
 
-    # Frame for the stock list (Treeview) (graphical user interface (GUI) element used to display the stock items in an organized, table-like format in the application.)
+    # Frame for the stock list (Treeview) and image preview
         list_frame = ttk.Frame(stock_frame)
         list_frame.pack(fill="both", expand=True, padx=5, pady=5)
 
-        # Treeview to display stock items with columns for description and quantity(using the Treeview widget in Tkinter to visually present a list of stock items in a table-like format.)
-        self.tree = ttk.Treeview(list_frame, height=10, columns=("desc", "qty"), show="headings")
+        # Create a horizontal layout with list on left and image on right
+        list_container = ttk.Frame(list_frame)
+        list_container.pack(side="left", fill="both", expand=True)
+        
+        image_container = ttk.Frame(list_frame)
+        image_container.pack(side="right", fill="y", padx=(10, 0))
+
+        # Treeview to display stock items (removed image column)
+        self.tree = ttk.Treeview(list_container, height=10, columns=("desc", "qty"), show="headings")
         self.tree.heading("desc", text="Description")  # Column header for Description
         self.tree.heading("qty", text="Quantity")  # Column header for Quantity
+        
+        # Set column widths
+        self.tree.column("desc", width=200, minwidth=150)
+        self.tree.column("qty", width=100, minwidth=80)
+        
         self.tree.pack(fill="both", expand=True)
+        
+        # Bind selection event to show image
+        self.tree.bind("<<TreeviewSelect>>", self.on_item_select)
+
+        # Image preview panel
+        ttk.Label(image_container, text="Item Image:").pack(pady=(0, 5))
+        self.image_label = ttk.Label(image_container)
+        self.image_label.pack()
+        
+        # Item info label
+        self.info_label = ttk.Label(image_container, text="Select an item\nto view image", justify="center")
+        self.info_label.pack(pady=(10, 0))
 
         # Separator for visual separation between elements(create a clear visual distinction or space between different sections or elements on the screen.)
         ttk.Separator(stock_frame).pack(fill="x", padx=10, pady=5)
@@ -113,21 +235,25 @@ class StockApp(tk.Tk):
         job_frame_inner = ttk.Frame(job_frame)
         job_frame_inner.pack(fill="x", padx=10, pady=10)
 
-        # Entry for item ID to take or return
-        self.job_id = tk.Entry(job_frame_inner, width=6)  # Item ID input for job actions
-        # Entry for quantity to take
-        self.job_qty = tk.Entry(job_frame_inner, width=8, justify="right")  # Quantity input for taking items
-        ttk.Button(job_frame_inner, text="Take", command=lambda r=False: self.take_or_return(False)).grid(row=0, column=0)  # Button to take items
-        tk.Label(job_frame_inner, text="→ Qty:").grid(row=0, column=1)  # Label for the quantity to take
-        self.job_qty.grid(row=0, column=2)  # Position the take quantity input
-        tk.Label(job_frame_inner, text="ID:").grid(row=0, column=3)  # Label for the item ID
-        self.job_id.grid(row=0, column=4)  # Position the item ID input
+        # Take section
+        ttk.Button(job_frame_inner, text="Take", command=lambda: self.take_or_return(False)).grid(row=0, column=0, padx=5, pady=5)  # Button to take items
+        tk.Label(job_frame_inner, text="ID:").grid(row=0, column=1, padx=5)  # Label for the item ID
+        self.take_id = tk.Entry(job_frame_inner, width=6)  # Item ID input for taking items
+        self.take_id.grid(row=0, column=2, padx=5)  # Position the take ID input
+        tk.Label(job_frame_inner, text="Qty:").grid(row=0, column=3, padx=5)  # Label for the quantity to take
+        self.take_qty = tk.Entry(job_frame_inner, width=8, justify="right")  # Quantity input for taking items
+        self.take_qty.grid(row=0, column=4, padx=5)  # Position the take quantity input
 
-        # Button to return items to stock
-        ttk.Button(job_frame_inner, text="Return", command=lambda r=True: self.take_or_return(True)).grid(row=1, column=0)  # Button to return items
-        tk.Label(job_frame_inner, text="← Qty:").grid(row=1, column=1)  # Label for the quantity to return
+        # Return section
+        ttk.Button(job_frame_inner, text="Return", command=lambda: self.take_or_return(True)).grid(row=1, column=0, padx=5, pady=5)  # Button to return items
+        tk.Label(job_frame_inner, text="ID:").grid(row=1, column=1, padx=5)  # Label for the return item ID
+        self.return_id = tk.Entry(job_frame_inner, width=6)  # Item ID input for returning items
+        self.return_id.grid(row=1, column=2, padx=5)  # Position the return ID input
+        tk.Label(job_frame_inner, text="Qty:").grid(row=1, column=3, padx=5)  # Label for the quantity to return
         self.return_qty = tk.Entry(job_frame_inner, width=8, justify="right")  # Input for return quantity
-        self.return_qty.grid(row=1, column=2)  # Position the return quantity input field
+        self.return_qty.grid(row=1, column=4, padx=5)  # Position the return quantity input field
+
+        
 
     def refresh_list(self):
         """
@@ -138,7 +264,28 @@ class StockApp(tk.Tk):
             self.tree.delete(row)
         # Insert all stock items into the list
         for iid, it in sorted(self.stock.items()):
-            self.tree.insert("", "end", iid, values=(it["desc"], it["qty"]))
+            # Store the item ID as tag for easy retrieval
+            self.tree.insert("", "end", iid=str(iid), values=(it["desc"], it["qty"]), tags=(str(iid),))
+
+    def on_item_select(self, event):
+        """
+        Handle item selection in the treeview and display corresponding image.
+        """
+        selection = self.tree.selection()
+        if selection:
+            # Get the item ID from the selection (this is the iid we set when inserting)
+            item_id = int(selection[0])
+            
+            # Update image preview
+            if hasattr(self, 'images') and item_id in self.images:
+                self.image_label.configure(image=self.images[item_id])
+                self.image_label.image = self.images[item_id]  # Keep a reference
+            else:
+                self.image_label.configure(image="")
+                
+            # Update info label
+            stock_item = self.stock[item_id]
+            self.info_label.configure(text=f"ID: {item_id}\n{stock_item['desc']}\nQty: {stock_item['qty']}")
 
     def add_item(self):
         """
@@ -183,8 +330,12 @@ class StockApp(tk.Tk):
         Take or return stock items based on the job action.
         """
         try:
-            iid = int(self.job_id.get())  # Get the item ID
-            qty = int(self.job_qty.get())  # Get the quantity for the job
+            if is_returning:  # Check if returning items
+                iid = int(self.return_id.get())  # Get the return item ID
+                qty = int(self.return_qty.get())  # Get the return quantity
+            else:  # If taking items
+                iid = int(self.take_id.get())  # Get the take item ID
+                qty = int(self.take_qty.get())  # Get the take quantity
         except:
             return messagebox.showerror("Error", "Enter valid item ID and quantity.")  # Show error if invalid input
         if iid not in self.stock:  # Check if the item ID exists
@@ -192,17 +343,20 @@ class StockApp(tk.Tk):
         if is_returning:  # Check if returning items
             self.stock[iid]["qty"] += qty  # Add the quantity back to the stock
             action = "returned"
+            # Clear return fields
+            self.return_id.delete(0, tk.END)
+            self.return_qty.delete(0, tk.END)
         else:  # If taking items
             if self.stock[iid]["qty"] < qty:  # Check if there is enough quantity to take
                 return messagebox.showerror("Error", "Not enough stock available.")  # Show error if insufficient stock
             self.stock[iid]["qty"] -= qty  # Decrease the quantity from the stock
             action = "taken"
+            # Clear take fields
+            self.take_id.delete(0, tk.END)
+            self.take_qty.delete(0, tk.END)
         self.save_stock()  # Save the updated stock data
         self.refresh_list()  # Refresh the stock list in the GUI
         messagebox.showinfo("Success", f"{qty} items {action} (ID {iid})")  # Show success message
-        self.job_id.delete(0, tk.END)  # Clear the item ID input
-        self.job_qty.delete(0, tk.END)  # Clear the quantity input
-        self.return_qty.delete(0, tk.END)  # Clear the return quantity input
 if __name__ == "__main__":
     # Run the application
     StockApp().mainloop()  # Start the Tkinter main event loop, making the app interactive
