@@ -12,44 +12,45 @@ It stores data persistently in a text file (`stock.txt`) with auto-incrementing 
 - Data saved and loaded automatically from `stock.txt`
 
 ## Functions
-from tkinter import ttk, messagebox
+*from tkinter import ttk, messagebox
 
-Purpose: Imports ttk (themed widgets for tkinter) and messagebox (for displaying messages) to enhance the GUI and handle errors
+-Purpose: Imports ttk (themed widgets for tkinter) and messagebox (for displaying messages) to enhance the GUI and handle errors
 
-if not os.path.exists(STOCK_FILE):
+*if not os.path.exists(STOCK_FILE):
 
-Purpose: Checks if the stock file exists. If it doesn't, the program creates it with default stock data.
+-Purpose: Checks if the stock file exists. If it doesn't, the program creates it with default stock data.
 
-iid, desc, qty = line.strip().split(",", 2)
+*iid, desc, qty = line.strip().split(",", 2)
 
-Purpose: Splits each line from the stock file into item ID, description, and quantity, which are then stored in a dictionary for use in the app
+-Purpose: Splits each line from the stock file into item ID, description, and quantity, which are then stored in a dictionary for use in the app
 
-self.images[item_id] = default_photo
+*self.images[item_id] = default_photo
 
-Purpose: Assigns a default image to the item in case the image couldn't be loaded from the URL.
+-Purpose: Assigns a default image to the item in case the image couldn't be loaded from the URL.
 
-response.raise_for_status()
+*response.raise_for_status()
 
-Purpose: Raises an error if the image URL is invalid or the image cannot be fetched, preventing further execution
+-Purpose: Raises an error if the image URL is invalid or the image cannot be fetched, preventing further execution
 
-notebook.add(stock_frame, text="Stock")
+*notebook.add(stock_frame, text="Stock")
 
-Purpose: Adds a tab to the notebook for displaying stock items in the GUI, allowing users to switch between tabs (e.g., stock and job tabs)
+-Purpose: Adds a tab to the notebook for displaying stock items in the GUI, allowing users to switch between tabs (e.g., stock and job tabs)
 
-self.image_label.configure(image=self.images[item_id])
-Purpose: Updates the image displayed on the GUI when a user selects a stock item, showing the corresponding image
+*self.image_label.configure(image=self.images[item_id])
 
-self.stock[new_id] = {"desc": desc, "qty": qty}
+-Purpose: Updates the image displayed on the GUI when a user selects a stock item, showing the corresponding image
 
-Purpose: Adds a new item to the stock dictionary with its description and quantity, then saves the updated stock
+*self.stock[new_id] = {"desc": desc, "qty": qty}
 
-self.stock[iid]["qty"] = new_qty
+-Purpose: Adds a new item to the stock dictionary with its description and quantity, then saves the updated stock
 
-Purpose: Updates the quantity of an existing stock item by modifying the corresponding entry(matches the id) in the stock dictionary
+*self.stock[iid]["qty"] = new_qty
 
-if self.stock[iid]["qty"] < qty:
+-Purpose: Updates the quantity of an existing stock item by modifying the corresponding entry(matches the id) in the stock dictionary
 
-Purpose:  Checks if there is enough stock to be taken, preventing users from taking more items than available
+*if self.stock[iid]["qty"] < qty:
+
+-Purpose:  Checks if there is enough stock to be taken, preventing users from taking more items than available
 
 ## How to Run
 
