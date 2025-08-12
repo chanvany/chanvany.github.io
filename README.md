@@ -3,10 +3,13 @@ A simple Python desktop application which is a Caesar Cipher tool that allows th
 
 ## Features
 
--Encryption with a random shift key (Caesar Cipher)
--Security with a PIN that is required for decryption
--Decryption capability after entering the correct PIN
--Non-technical user interaction that allows users to easily encrypt and decrypt messages
+- Encryption with a random shift key (Caesar Cipher)
+
+- Security with a PIN that is required for decryption
+
+- Decryption capability after entering the correct PIN
+
+- Non-technical user interaction that allows users to easily encrypt and decrypt messages
 
 ## Functions
 - key = random.randint(1, 25)
