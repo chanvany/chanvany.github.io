@@ -1,60 +1,61 @@
 # Stock & Job Management System
 
-A simple Python desktop application built with Tkinter for managing stock inventory and job checkout/return operations.  
-It stores data persistently in a text file (`stock.txt`) with auto-incrementing IDs and quantity tracking.
+A simple Python desktop application which is a Caesar Cipher tool that allows the user to encrypt and decrypt messages with a random shift value, while also providing extra security with a PIN code.
 
 ## Features
 
-- Add new stock items with description and quantity  
-- Update stock quantities without removing items  
-- Job tab for checking out and returning stock items  
-- Stock validation to prevent over-checkout  
-- Data saved and loaded automatically from `stock.txt`
+-Encryption with a random shift key (Caesar Cipher)
+-Security with a PIN that is required for decryption
+-Decryption capability after entering the correct PIN
+-Non-technical user interaction that allows users to easily encrypt and decrypt messages
 
 ## Functions
-- from tkinter import ttk, messagebox
+- key = random.randint(1, 25)
 
--Purpose: Imports ttk (themed widgets for tkinter) and messagebox (for displaying messages) to enhance the GUI and handle errors
+-Purpose: This line generates a random integer between 1 and 25, which will be used as the shift key for the Caesar cipher encryption. This means the message will be encrypted by shifting each letter or number by a random number of positions
 
-- if not os.path.exists(STOCK_FILE):
+- if char.isalpha():
+    base = ord('A') if char.isupper() else ord('a')
+    encrypted += chr((ord(char) - base + shift) % 26 + base):
 
--Purpose: Checks if the stock file exists. If it doesn't, the program creates it with default stock data.
+-Purpose: This checks if the character is a letter and then shifts it by the shift value. It handles both uppercase and lowercase letters.
 
-- iid, desc, qty = line.strip().split(",", 2)
+- elif char.isdigit():
+    encrypted += str((int(char) + shift) % 10)
 
--Purpose: Splits each line from the stock file into item ID, description, and quantity, which are then stored in a dictionary for use in the app
+-Purpose: This checks if the character is a digit and shifts it by the shift value. It ensures digits loop around from 9 to 0 when needed (e.g., 8 + 3 = 1).
 
-- self.images[item_id] = default_photo
+- while len(user_pin) != 4 or not user_pin.isdigit():
+    user_pin = input(" PIN must be exactly 4 digits. Try again: ")
 
--Purpose: Assigns a default image to the item in case the image couldn't be loaded from the URL.
+-Purpose: This ensures that the user enters a valid 4-digit PIN. If the input is invalid (not 4 digits or contains non-numeric characters), the program asks again.
 
-- response.raise_for_status()
+- if entered_pin == user_pin:
+    decrypted_message = caesar_decrypt(encrypted_message, key)
+  
+-Purpose: This checks if the entered PIN matches the PIN the user set earlier. If it’s correct, the program proceeds to decrypt the message using the correct shift value.
 
--Purpose: Raises an error if the image URL is invalid or the image cannot be fetched, preventing further execution
+- else:
+    encrypted += char
 
-- notebook.add(stock_frame, text="Stock")
+-Purpose: This part of the code ensures that non-alphabetic characters (like punctuation, spaces, etc.) are left unchanged during encryption and decryption.
 
--Purpose: Adds a tab to the notebook for displaying stock items in the GUI, allowing users to switch between tabs (e.g., stock and job tabs)
+- choice = input("\nDo you want to decrypt your message? (y/n): ").lower()
 
-- self.image_label.configure(image=self.images[item_id])
+-Purpose: This asks the user if they want to decrypt their message, and converts the input to lowercase for consistency (handles both 'y' and 'Y').
 
--Purpose: Updates the image displayed on the GUI when a user selects a stock item, showing the corresponding image
+- print(" Encrypted Message:", encrypted_message)
+print(" Encryption Key (Save this to decrypt):", key)
 
-- self.stock[new_id] = {"desc": desc, "qty": qty}
+-Purpose: After encrypting the message, this displays:
+- The encrypted message.
+- The key used for encryption (which is required for decryption).
 
--Purpose: Adds a new item to the stock dictionary with its description and quantity, then saves the updated stock
 
-- self.stock[iid]["qty"] = new_qty
-
--Purpose: Updates the quantity of an existing stock item by modifying the corresponding entry(matches the id) in the stock dictionary
-
-- if self.stock[iid]["qty"] < qty:
-
--Purpose:  Checks if there is enough stock to be taken, preventing users from taking more items than available
 
 ## How to Run
 
-1. Make sure you have Python 3 installed (with Tkinter).  
+1. Make sure you have Python 3 installed.  
 2. Clone the repository:  
    ```bash
    git clone https://github.com/chanvany/chanvany.github.io
