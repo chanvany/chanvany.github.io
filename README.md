@@ -1,5 +1,4 @@
-# Stock & Job Management System
-
+# Caesar Cipher Tool
 A simple Python desktop application which is a Caesar Cipher tool that allows the user to encrypt and decrypt messages with a random shift value, while also providing extra security with a PIN code.
 
 ## Features
